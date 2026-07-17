@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTECH CRÉDITOS - Gestión Profesional</title>
+    <!-- Importación de las mejores tipografías modernas y legibles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS para Diseño Moderno y Limpio -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Aplicación de la tipografía ultra-limpia a todo el sitio */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <!-- html2canvas para Exportación Exacta de Recibos a Imagen -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body class="bg-gray-100 antialiased min-h-screen pb-12">
+
+    <!-- HEADER DE LA APLICACIÓN -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="text-center sm:text-left">
+                <h1 class="text-2xl font-black tracking-wider text-blue-400">ARTECH CRÉDITOS</h1>
+                <p class="text-xs text-gray-400 font-medium">Panel Integral de Cobranzas y Control de Saldos</p>
+            </div>
+            <div class="text-sm bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 w-full sm:w-auto text-center">
+                <span class="text-gray-400 font-medium">Estado del Sistema:</span> <span class="text-green-400 font-bold">Local Activo</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- SECCIÓN IZQUIERDA: FORMULARIOS DE REGISTRO -->
+        <div class="space-y-6 lg:col-span-1">
+            <!-- Formulario: Registrar Cliente -->
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <span class="p-1.5 bg-blue-100 text-blue-600 rounded-lg">👤</span> Nuevo Registro de Cliente
+                </h2>
+                <form id="formCliente" onsubmit="crearCliente(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1 tracking-wide">Nombre Completo *</label>
+                        <input id="cliNombre" type="text" required class="w-full border border-gray-300 rounded-xl p-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej. Juan Pérez">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1 tracking-wide">Suplente / Garante (Opcional)</label>
+                        <input id="cliSuplente" type="text" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej. María López">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-2.5 rounded-xl transition text-sm shadow-sm tracking-wide">
+                        Registrar Cliente
+                    </button>
+                </form>
+            </div>
+
+            <!-- Formulario: Asignar Crédito (Dinámico) -->
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <span class="p-1.5 bg-green-100 text-green-600 rounded-lg">📦</span> Asignar Nuevo Crédito
+                </h2>
+                <form id="formCredito" onsubmit="asignarCredito(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1 tracking-wide">Seleccionar Cliente *</label>
+                        <select id="credClienteId" required class="w-full border border-gray-300 rounded-xl p-2.5 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Seleccione un Cliente --</option>
+                        </select>
+                    </div>
+
+                    <!-- NOMBRE DEL CRÉDITO -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1 tracking-wide">Nombre identificador del Crédito *</label>
+                        <input id="credNombrePlan" type="text" required class="w-full border border-gray-300 rounded-xl p-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej. Crédito de Moto, Plan Electrodomésticos">
+                    </div>
+
+                    <!-- SECCIÓN: LISTADO DE PRODUCTOS DINÁMICOS -->
+                    <div class="border-t pt-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="block text-xs font-bold text-gray-600 uppercase tracking-wide">Productos en este Crédito *</span>
+                            <button type="button" onclick="agregarFilaProducto()" class="text-xs text-blue-600 font-bold hover:underline">+ Añadir Producto</button>
+                        </div>
+                        <div id="contenedorProductos" class="space-y-2">
+                            <div class="grid grid-cols-12 gap-2 fila-producto">
+                                <input type="text" placeholder="Producto" required class="col-span-7 prodNombre border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <input type="number" step="0.01" placeholder="Precio" required oninput="calcularTotalAutomatico(); redistribuirCuotasAutomatico();" class="col-span-5 prodPrecio border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CUADRO DE TOTAL AUTOMÁTICO -->
+                    <div class="bg-blue-50 p-3 rounded-xl border border-blue-200 flex justify-between items-center my-2">
+                        <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">Total del Crédito:</span>
+                        <span id="labelTotalAutomatico" class="text-base font-black text-blue-700">0.00 Bs.</span>
+                    </div>
+                    
+                    <!-- PROGRAMACIÓN DE CUOTAS DINÁMICAS -->
+                    <div class="border-t pt-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="block text-xs font-bold text-gray-600 uppercase tracking-wide">Cronograma de Pagos *</span>
+                            <button type="button" onclick="agregarFilaCuota()" class="text-xs text-blue-600 font-bold hover:underline">+ Añadir Fecha de Pago</button>
+                        </div>
+                        
+                        <!-- Panel Guía de Cuadres -->
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-2 mb-3 text-[11px] text-amber-800 flex justify-between font-semibold">
+                            <span>Balance:</span>
+                            <span id="guiaFaltaProgramar" class="font-bold">Falta programar: 0.00 Bs.</span>
+                        </div>
+
+                        <div class="space-y-2" id="contenedorProgramacion">
+                            <!-- Se genera dinámicamente mediante JS -->
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold p-2.5 rounded-xl transition text-sm shadow-sm tracking-wide">
+                        Habilitar Crédito
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DERECHA: PANEL DE GESTIÓN Y CRÉDITOS ACTIVOS -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 text-center sm:text-left">Panel de Clientes y Carteras Activas</h2>
+                    <span id="contadorClientes" class="bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full text-xs border border-gray-200">0 Clientes</span>
+                </div>
+                
+                <!-- Contenedor Principal donde se inyectan los clientes -->
+                <div id="listaGeneral" class="space-y-6">
+                    <!-- Contenido renderizado por JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- COMPONENTE OCULTO: PLANTILLA DE CAPTURA DE RECIBO -->
+    <div class="fixed left-[-9999px] top-[-9999px]">
+        <div id="reciboExportar" class="bg-white w-[500px] p-8 border-t-8 border-slate-900 shadow-2xl text-gray-800 relative">
+            
+            <!-- CONTENEDOR EXCLUSIVO PARA MARCA DE PAGADO DENTRO DEL RECIBO -->
+            <div id="reciboLetreroPagado" class="hidden absolute top-40 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-4 border-green-600 text-green-600 font-black text-4xl tracking-widest uppercase px-6 py-2 rounded-xl rotate-[-12deg] opacity-80 z-50 pointer-events-none text-center bg-white/90 shadow-md">
+                PAGADO
+                <span class="block text-[10px] tracking-normal font-bold text-green-700 mt-0.5">Crédito finalizado</span>
+            </div>
+
+            <div class="flex justify-between items-start border-b pb-4">
+                <div>
+                    <h2 class="text-2xl font-black tracking-tight text-slate-900">ARTECH CRÉDITOS</h2>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5">Comprobante de Estado de Cuenta</p>
+                </div>
+                <div class="text-right flex flex-col items-end gap-1">
+                    <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-bold uppercase tracking-wider" id="reciboId"></span>
+                    <span class="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded" id="reciboNombreCredito"></span>
+                </div>
+            </div>
+            
+            <div class="mt-6 grid grid-cols-2 gap-4 text-sm border-b pb-4">
+                <div>
+                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wide">Titular del Crédito</p>
+                    <p class="font-bold text-gray-800 text-base" id="reciboCliente"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wide">Suplente / Garante</p>
+                    <p class="font-semibold text-gray-700" id="reciboSuplente"></p>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wide mb-1">Lanzamiento del Crédito</p>
+                    <p class="font-semibold text-gray-700 text-xs" id="reciboFechaInicio"></p>
+                </div>
+            </div>
+
+            <!-- DETALLE DE ARTÍCULOS EN LISTA FORMATO PROFESIONAL -->
+            <div class="mt-4">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wide mb-2">Artículos Detallados</p>
+                <div id="reciboListaProductos" class="space-y-1 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-800 font-medium">
+                    <!-- Se inyecta la lista de productos aquí -->
+                </div>
+            </div>
+
+            <!-- CUADRO DE EQUILIBRIO DE SALDOS -->
+            <div class="mt-6 bg-slate-50 p-4 rounded-xl grid grid-cols-3 gap-2 text-center border border-slate-200">
+                <div>
+                    <p class="text-xs text-gray-500 font-semibold">Monto Original</p>
+                    <p class="text-base font-bold text-slate-900" id="reciboTotal"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-semibold">Total Amortizado</p>
+                    <p class="text-base font-bold text-blue-600" id="reciboAmortizado"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-semibold">Saldo Restante</p>
+                    <p class="text-base font-bold text-red-600" id="reciboSaldo"></p>
+                </div>
+            </div>
+
+            <!-- TABLA DE CONTROL DE PAGOS EFECTUADOS -->
+            <div class="mt-6">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Últimos Movimientos Registrados</h3>
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-gray-600 uppercase font-bold tracking-wide">
+                            <th class="p-2 rounded-l">Fecha del Abono</th>
+                            <th class="p-2 text-right rounded-r">Monto Liquidado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reciboListaPagos" class="divide-y">
+                        <!-- Inyección vía JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-8 border-t pt-4 text-center">
+                <p class="text-[10px] text-gray-400 tracking-wide font-mono">Este documento refleja los movimientos financieros vigentes en el sistema centralizado de ARTECH CRÉDITOS.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLADORES LÓGICOS EN JAVASCRIPT -->
+    <script>
+        let baseDatos = JSON.parse(localStorage.getItem('artech_sistema_cobros')) || [];
+
+        // Añadir dinámicamente campos para un nuevo producto
+        function agregarFilaProducto() {
+            const contenedor = document.getElementById('contenedorProductos');
+            const nuevaFila = document.createElement('div');
+            nuevaFila.className = 'grid grid-cols-12 gap-2 fila-producto';
+            nuevaFila.innerHTML = `
+                <input type="text" placeholder="Producto" required class="col-span-7 prodNombre border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <input type="number" step="0.01" placeholder="Precio" required oninput="calcularTotalAutomatico(); redistribuirCuotasAutomatico();" class="col-span-4 prodPrecio border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <button type="button" onclick="this.parentElement.remove(); calcularTotalAutomatico(); redistribuirCuotasAutomatico();" class="col-span-1 text-red-500 font-bold text-xs hover:text-red-700">X</button>
+            `;
+            contenedor.appendChild(nuevaFila);
+        }
+
+        // Calcula dinámicamente la suma de precios ingresados en los productos
+        function calcularTotalAutomatico() {
+            const precios = document.querySelectorAll('.prodPrecio');
+            let suma = 0;
+            precios.forEach(input => {
+                const valor = parseFloat(input.value);
+                if (!isNaN(valor)) {
+                    suma += valor;
+                }
+            });
+            document.getElementById('labelTotalAutomatico').innerText = `${suma.toFixed(2)} Bs.`;
+            return suma;
+        }
+
+        // Añadir dinámicamente campos para fechas de pago programadas (Max 24)
+        function agregarFilaCuota() {
+            const contenedor = document.getElementById('contenedorProgramacion');
+            const totalFilas = contenedor.querySelectorAll('.fila-cuota').length;
+            
+            if (totalFilas >= 24) {
+                alert("El sistema permite un máximo de 24 cuotas programadas.");
+                return;
+            }
+
+            const nuevaFila = document.createElement('div');
+            nuevaFila.className = 'grid grid-cols-12 gap-2 fila-cuota';
+            nuevaFila.innerHTML = `
+                <input type="date" required class="col-span-6 progFecha border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <input type="number" step="0.01" placeholder="Monto" required oninput="calcularBalanceCuotas()" class="col-span-5 progMonto border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <button type="button" onclick="this.parentElement.remove(); redistribuirCuotasAutomatico();" class="col-span-1 text-red-500 font-bold text-xs hover:text-red-700">X</button>
+            `;
+            contenedor.appendChild(nuevaFila);
+            
+            const inputFecha = nuevaFila.querySelector('.progFecha');
+            inputFecha.value = new Date().toISOString().split('T')[0];
+
+            redistribuirCuotasAutomatico();
+        }
+
+        // Divide equitativamente el total de la deuda entre la cantidad de cuotas abiertas
+        function redistribuirCuotasAutomatico() {
+            const totalCredito = calcularTotalAutomatico();
+            const inputsMontos = document.querySelectorAll('.progMonto');
+            if (inputsMontos.length === 0) return;
+
+            const cuotaEquitativa = (totalCredito / inputsMontos.length).toFixed(2);
+            inputsMontos.forEach(input => {
+                input.value = cuotaEquitativa;
+            });
+            calcularBalanceCuotas();
+        }
+
+        // Calcula cuánto falta o sobra distribuir manualmente en las cuotas
+        function calcularBalanceCuotas() {
+            const totalCredito = calcularTotalAutomatico();
+            const inputsMontos = document.querySelectorAll('.progMonto');
+            let sumaProgramada = 0;
+
+            inputsMontos.forEach(input => {
+                const valor = parseFloat(input.value);
+                if (!isNaN(valor)) sumaProgramada += valor;
+            });
+
+            const diferencia = totalCredito - sumaProgramada;
+            const labelGuia = document.getElementById('guiaFaltaProgramar');
+            
+            if (Math.abs(diferencia) < 0.01) {
+                labelGuia.innerText = "Cuotas perfectamente cuadradas.";
+                labelGuia.className = "font-bold text-green-600";
+            } else if (diferencia > 0) {
+                labelGuia.innerText = `Falta programar: ${diferencia.toFixed(2)} Bs.`;
+                labelGuia.className = "font-bold text-amber-600";
+            } else {
+                labelGuia.innerText = `Exceso detectado: ${Math.abs(diferencia).toFixed(2)} Bs.`;
+                labelGuia.className = "font-bold text-red-600";
+            }
+        }
+
+        // Generar la primera cuota obligatoria por defecto al limpiar el formulario
+        function restaurarFormularioCredito() {
+            document.getElementById('formCredito').reset();
+            document.getElementById('contenedorProductos').innerHTML = `
+                <div class="grid grid-cols-12 gap-2 fila-producto">
+                    <input type="text" placeholder="Producto" required class="col-span-7 prodNombre border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <input type="number" step="0.01" placeholder="Precio" required oninput="calcularTotalAutomatico(); redistribuirCuotasAutomatico();" class="col-span-5 prodPrecio border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                </div>
+            `;
+            document.getElementById('contenedorProgramacion').innerHTML = `
+                <div class="grid grid-cols-12 gap-2 fila-cuota">
+                    <input type="date" required class="col-span-6 progFecha border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <input type="number" step="0.01" placeholder="Monto" required oninput="calcularBalanceCuotas()" class="col-span-5 progMonto border border-gray-300 rounded-lg p-2 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <div class="col-span-1"></div>
+                </div>
+            `;
+            document.querySelector('.progFecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('labelTotalAutomatico').innerText = "0.00 Bs.";
+            document.getElementById('guiaFaltaProgramar').innerText = "Falta programar: 0.00 Bs.";
+            document.getElementById('guiaFaltaProgramar').className = "font-bold text-amber-600";
+        }
+
+        // Registro de un Cliente Nuevo en la BD
+        function crearCliente(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('cliNombre').value.trim();
+            const suplente = document.getElementById('cliSuplente').value.trim();
+
+            if (!nombre) return;
+
+            const nuevoCliente = {
+                id: 'cli_' + Date.now(),
+                nombre: nombre,
+                suplente: suplente || 'No asignado',
+                creditos: []
+            };
+
+            baseDatos.push(nuevoCliente);
+            actualizarBaseDatos();
+            document.getElementById('formCliente').reset();
+        }
+
+        // Editar Nombre y Suplente de un cliente existente
+        function editarCliente(clienteId) {
+            const cliente = baseDatos.find(c => c.id === clienteId);
+            if (!cliente) return;
+
+            const nuevoNombre = prompt("Editar Nombre Completo del Cliente:", cliente.nombre);
+            if (nuevoNombre === null) return;
+            const limpioNombre = nuevoNombre.trim();
+            if (!limpioNombre) {
+                alert("El nombre del cliente no puede estar vacío.");
+                return;
+            }
+
+            const nuevoSuplente = prompt("Editar Suplente / Garante (Opcional):", cliente.suplente);
+            
+            cliente.nombre = limpioNombre;
+            if (nuevoSuplente !== null) {
+                cliente.suplente = nuevoSuplente.trim() || 'No asignado';
+            }
+
+            actualizarBaseDatos();
+        }
+
+        // Eliminar cliente de la base de datos por completo
+        function eliminarCliente(clienteId) {
+            const cliente = baseDatos.find(c => c.id === clienteId);
+            if (!cliente) return;
+
+            const confirmar = confirm(`¿Está completamente seguro de eliminar al cliente "${cliente.nombre}"?\nEsta acción borrará permanentemente todos sus créditos e historial asociados.`);
+            if (confirmar) {
+                baseDatos = baseDatos.filter(c => c.id !== clienteId);
+                actualizarBaseDatos();
+            }
+        }
+
+        // NUEVA FUNCIÓN: Eliminar un crédito específico de un cliente con doble confirmación
+        function eliminarCredito(clienteId, creditoId) {
+            const cliente = baseDatos.find(c => c.id === clienteId);
+            if (!cliente) return;
+
+            const credito = cliente.creditos.find(cr => cr.id === creditoId);
+            if (!credito) return;
+
+            const identificador = credito.nombrePlan || 'Crédito General';
+            const confirmar = confirm(`¿Está seguro de eliminar el crédito "${identificador}" perteneciente a "${cliente.nombre}"?\nEsta acción no se puede deshacer.`);
+            
+            if (confirmar) {
+                cliente.creditos = cliente.creditos.filter(cr => cr.id !== creditoId);
+                actualizarBaseDatos();
+            }
+        }
+
+        // Asignación de un crédito
+        function asignarCredito(e) {
+            e.preventDefault();
+            const clienteId = document.getElementById('credClienteId').value;
+            const nombrePlan = document.getElementById('credNombrePlan').value.trim();
+            
+            if (!clienteId || !nombrePlan) return;
+
+            const elementosNombres = document.querySelectorAll('.prodNombre');
+            const elementosPrecios = document.querySelectorAll('.prodPrecio');
+            
+            let listaProductosDesc = [];
+            let totalCalculado = 0;
+
+            elementosNombres.forEach((elem, index) => {
+                const nombreProd = elem.value.trim();
+                const precioProd = parseFloat(elementosPrecios[index].value);
+                if (nombreProd && !isNaN(precioProd)) {
+                    listaProductosDesc.push({ nombre: nombreProd, precio: precioProd });
+                    totalCalculado += precioProd;
+                }
+            });
+
+            if (listaProductosDesc.length === 0 || totalCalculado <= 0) return;
+
+            const elementosFechas = document.querySelectorAll('.progFecha');
+            const elementosMontos = document.querySelectorAll('.progMonto');
+            let cronograma = [];
+
+            elementosFechas.forEach((elem, index) => {
+                const fVal = elem.value;
+                const mVal = parseFloat(elementosMontos[index].value);
+                if (fVal && !isNaN(mVal)) {
+                    cronograma.push({ fecha: fVal, monto: mVal });
+                }
+            });
+
+            const nuevoCredito = {
+                id: 'cred_' + Date.now(),
+                nombrePlan: nombrePlan,
+                productos: listaProductosDesc,
+                total: totalCalculado,
+                fechaInicio: new Date().toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                programacion: cronograma,
+                pagos: []
+            };
+
+            const clienteIndex = baseDatos.findIndex(c => c.id === clienteId);
+            if (clienteIndex !== -1) {
+                baseDatos[clienteIndex].creditos.push(nuevoCredito);
+                actualizarBaseDatos();
+                restaurarFormularioCredito();
+            }
+        }
+
+        // Registro de abonos
+        function registrarAbono(clienteId, creditoId) {
+            const montoAbono = parseFloat(prompt("Ingrese el monto del pago realizado (Bs.):"));
+            if (isNaN(montoAbono) || montoAbono <= 0) {
+                alert("Monto inválido.");
+                return;
+            }
+
+            const cliente = baseDatos.find(c => c.id === clienteId);
+            if (!cliente) return;
+
+            const credito = cliente.creditos.find(cr => cr.id === creditoId);
+            if (!credito) return;
+
+            const totalPagado = credito.pagos.reduce((sum, p) => sum + p.monto, 0);
+            const saldoActual = credito.total - totalPagado;
+
+            // Arreglo de decimales flotantes para evitar micro-diferencias matemáticas
+            if (parseFloat(montoAbono.toFixed(2)) > parseFloat(saldoActual.toFixed(2))) {
+                alert(`El abono supera el saldo pendiente de Bs. ${saldoActual.toFixed(2)}`);
+                return;
+            }
+
+            const nuevoPago = {
+                fecha: new Date().toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                monto: montoAbono
+            };
+
+            credito.pagos.push(nuevoPago);
+            actualizarBaseDatos();
+        }
+
+        // Sincronizar cambios en LocalStorage y refrescar las vistas de la App
+        function actualizarBaseDatos() {
+            localStorage.setItem('artech_sistema_cobros', JSON.stringify(baseDatos));
+            renderizarInterfaz();
+        }
+
+        // Renderizado del HTML Reactivo Dinámico Completo e Inteligente
+        function renderizarInterfaz() {
+            const selectClientes = document.getElementById('credClienteId');
+            const valorSeleccionado = selectClientes.value;
+            
+            selectClientes.innerHTML = '<option value="">-- Seleccione un Cliente --</option>' + 
+                baseDatos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+            selectClientes.value = valorSeleccionado;
+
+            document.getElementById('contadorClientes').innerText = `${baseDatos.length} Clientes`;
+
+            const listaGeneral = document.getElementById('listaGeneral');
+            if (baseDatos.length === 0) {
+                listaGeneral.innerHTML = `
+                    <div class="text-center py-12 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50">
+                        <p class="text-gray-400 text-sm font-medium">No existen clientes registrados en ARTECH CRÉDITOS.</p>
+                    </div>`;
+                return;
+            }
+
+            listaGeneral.innerHTML = baseDatos.map(cliente => {
+                return `
+                <div class="bg-gray-50 rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start border-b pb-3 gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">${cliente.nombre}</h3>
+                            <p class="text-xs text-gray-500 font-medium">Suplente/Garante: <span class="font-semibold text-gray-700">${cliente.suplente}</span></p>
+                            
+                            <div class="flex gap-3 mt-2 text-[11px] font-bold">
+                                <button onclick="editarCliente('${cliente.id}')" class="text-blue-600 hover:text-blue-800 transition">✏️ Editar Datos</button>
+                                <button onclick="eliminarCliente('${cliente.id}')" class="text-red-600 hover:text-red-800 transition">🗑️ Eliminar Cliente</button>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold px-2.5 py-1 bg-slate-200 text-slate-800 rounded-md self-start sm:self-center">${cliente.creditos.length} Crédito(s)</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        ${cliente.creditos.length === 0 ? '<p class="text-xs text-gray-400 italic font-medium">Este cliente no posee carteras de crédito abiertas.</p>' : 
+                        cliente.creditos.map(credito => {
+                            const totalAbonado = credito.pagos.reduce((sum, p) => sum + p.monto, 0);
+                            const saldoFinal = Math.max(0, credito.total - totalAbonado);
+                            const estaPagado = saldoFinal <= 0.009; // Evaluación segura de saldo cero
+                            
+                            const textoProductos = credito.productos ? credito.productos.map(p => `${p.nombre} (Bs. ${p.precio.toFixed(2)})`).join(', ') : 'Sin especificar';
+                            const identificadorCredito = credito.nombrePlan || 'Crédito General';
+
+                            return `
+                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-4 relative overflow-hidden">
+                                <div class="space-y-1">
+                                    <span class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">${identificadorCredito}</span>
+                                    <h4 class="font-bold text-gray-800 text-xs">${textoProductos}</h4>
+                                    <p class="text-[11px] text-gray-400 font-medium">Otorgado: ${credito.fechaInicio}</p>
+                                    
+                                    <!-- BOTÓN EXTRA PARA BORRAR UN CRÉDITO ESPECÍFICO -->
+                                    <div class="pt-1">
+                                        <button onclick="eliminarCredito('${cliente.id}', '${credito.id}')" class="text-[10px] font-bold text-red-500 hover:text-red-700 transition">
+                                            ❌ Eliminar Crédito
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1 bg-slate-50 p-2 rounded-lg text-xs font-medium">
+                                    <p class="text-gray-500 flex justify-between"><span>Total:</span> <span class="font-bold text-slate-800">${credito.total.toFixed(2)} Bs.</span></p>
+                                    <p class="text-blue-600 flex justify-between"><span>Abonado:</span> <span class="font-bold">${totalAbonado.toFixed(2)} Bs.</span></p>
+                                    <p class="text-red-600 flex justify-between border-t pt-1 mt-1 font-bold"><span>Saldo Faltante:</span> <span>${saldoFinal.toFixed(2)} Bs.</span></p>
+                                </div>
+
+                                <div class="flex flex-col justify-center gap-2">
+                                    ${estaPagado ? `
+                                        <!-- LETRERO DE CRÉDITO TOTALMENTE LIQUIDADO -->
+                                        <div class="bg-green-50 border-2 border-green-500 text-green-700 rounded-xl p-3 text-center shadow-xs">
+                                            <p class="text-xl font-black tracking-widest uppercase leading-none">PAGADO</p>
+                                            <p class="text-[10px] font-bold text-green-600 tracking-wide mt-1">Crédito finalizado</p>
+                                        </div>
+                                    ` : `
+                                        <button onclick="registrarAbono('${cliente.id}', '${credito.id}')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2 px-3 rounded-lg border border-blue-200 transition text-center">
+                                            📥 Registrar Abono
+                                        </button>
+                                    `}
+                                    <button onclick="exportarReciboImagen('${cliente.id}', '${credito.id}')" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2 px-3 rounded-lg transition text-center">
+                                        🖼️ Exportar Recibo
+                                    </button>
+                                </div>
+
+                                ${credito.programacion && credito.programacion.length > 0 ? `
+                                <div class="col-span-1 md:col-span-3 border-t pt-2 mt-1">
+                                    <p class="text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Cronograma Planificado:</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                        ${credito.programacion.map((p, i) => `
+                                            <div class="bg-amber-50/50 border border-amber-200 p-1.5 rounded text-[11px] flex justify-between items-center">
+                                                <span class="text-amber-800 font-bold">F${i+1}: ${p.fecha}</span>
+                                                <span class="font-bold text-amber-900">${p.monto.toFixed(2)} Bs.</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>` : ''}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // Renderizado del Recibo Oculto y Conversión Directa a Imagen PNG
+        function exportarReciboImagen(clienteId, creditoId) {
+            const cliente = baseDatos.find(c => c.id === clienteId);
+            const credito = cliente.creditos.find(cr => cr.id === creditoId);
+
+            const totalAbonado = credito.pagos.reduce((sum, p) => sum + p.monto, 0);
+            const saldoFinal = Math.max(0, credito.total - totalAbonado);
+            const estaPagado = saldoFinal <= 0.009;
+
+            // Manejo dinámico del letrero de PAGADO en el recibo imprimible
+            const letreroPagado = document.getElementById('reciboLetreroPagado');
+            if (estaPagado) {
+                letreroPagado.classList.remove('hidden');
+            } else {
+                letreroPagado.classList.add('hidden');
+            }
+
+            document.getElementById('reciboId').innerText = credito.id.toUpperCase();
+            document.getElementById('reciboNombreCredito').innerText = credito.nombrePlan ? credito.nombrePlan.toUpperCase() : 'CRÉDITOS';
+            document.getElementById('reciboCliente').innerText = cliente.nombre;
+            document.getElementById('reciboSuplente').innerText = cliente.suplente;
+            document.getElementById('reciboFechaInicio').innerText = credito.fechaInicio;
+            
+            const contenedorListaProd = document.getElementById('reciboListaProductos');
+            if (credito.productos && credito.productos.length > 0) {
+                contenedorListaProd.innerHTML = credito.productos.map(p => `
+                    <div class="flex justify-between items-center py-1 border-b border-slate-200 last:border-0">
+                        <span>• ${p.nombre}</span>
+                        <span class="font-bold text-slate-900">${p.precio.toFixed(2)} Bs.</span>
+                    </div>
+                `).join('');
+            } else {
+                contenedorListaProd.innerHTML = `<div>Sin artículos especificados.</div>`;
+            }
+
+            document.getElementById('reciboTotal').innerText = `${credito.total.toFixed(2)} Bs.`;
+            document.getElementById('reciboAmortizado').innerText = `${totalAbonado.toFixed(2)} Bs.`;
+            document.getElementById('reciboSaldo').innerText = `${saldoFinal.toFixed(2)} Bs.`;
+
+            const tablaPagos = document.getElementById('reciboListaPagos');
+            if (credito.pagos.length === 0) {
+                tablaPagos.innerHTML = `<tr><td colspan="2" class="p-3 text-center text-gray-400 italic font-medium">No se han registrado abonos a la fecha.</td></tr>`;
+            } else {
+                tablaPagos.innerHTML = credito.pagos.map(p => `
+                    <tr class="text-gray-700 font-medium">
+                        <td class="p-2">${p.fecha}</td>
+                        <td class="p-2 text-right font-bold text-slate-900">${p.monto.toFixed(2)} Bs.</td>
+                    </tr>
+                `).join('');
+            }
+
+            const objetivo = document.getElementById('reciboExportar');
+            html2canvas(objetivo, {
+                scale: 2,
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                const disparadorDescarga = document.createElement('a');
+                disparadorDescarga.download = `ARTECH_RECIBO_${cliente.nombre.replace(/\s+/g, '_')}.png`;
+                disparadorDescarga.href = canvas.toDataURL('image/png');
+                disparadorDescarga.click();
+            });
+        }
+
+        // Carga inicial estable de la interfaz
+        restaurarFormularioCredito();
+        renderizarInterfaz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VandG Artech Technology</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #1a3a6c;
+            --secondary-blue: #2c5aa0;
+            --accent-red: #c0392b;
+            --canva-purple: #00c4cc;
+            --dark-text: #2c3e50;
+            --border-radius: 8px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f5f7fa; color: var(--dark-text); padding-bottom: 50px; }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white; padding: 1rem; position: sticky; top: 0; z-index: 100;
+        }
+        
+        .header-container { display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-text span { color: #e74c3c; }
+
+        nav ul { display: flex; list-style: none; gap: 1.5rem; }
+        nav a { color: white; text-decoration: none; font-weight: bold; padding: 5px 10px; cursor: pointer; }
+        nav a.active { border-bottom: 2px solid white; }
+
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .btn { 
+            padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; 
+            font-weight: bold; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-blue { background: var(--secondary-blue); color: white; }
+        .btn-green { background: #27ae60; color: white; }
+        .btn-red { background: #c0392b; color: white; }
+        .btn-purple { background: #7d2ae8; color: white; }
+
+        .form-group { margin-bottom: 1rem; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px; }
+
+        .item-row { 
+            background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;
+            border: 1px solid #ddd;
+        }
+        .item-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .lic-input { 
+            border: none; border-bottom: 1px solid #ddd; background: #fffcf0; 
+            padding: 5px; font-size: 0.85rem; width: 100%; display: none;
+        }
+
+        /* Estilos de Recibo y Regalo */
+        .receipt-preview, .gift-preview {
+            background: white; padding: 40px; border-radius: 5px; margin-top: 20px;
+            border: 1px solid #ddd; width: 100%; max-width: 700px; margin-inline: auto;
+            position: relative; overflow: hidden;
+        }
+        
+        /* Estilo específico Regalo */
+        .gift-preview { border: 3px solid #7d2ae8; border-style: dashed; }
+        .gift-badge { 
+            position: absolute; top: 20px; right: -30px; background: #ff4757; 
+            color: white; padding: 10px 40px; transform: rotate(45deg); font-weight: bold;
+        }
+
+        .receipt-header { text-align: center; border-bottom: 2px solid var(--primary-blue); padding-bottom: 15px; margin-bottom: 20px; }
+        .receipt-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f2f2f2; }
+        .total-row { font-weight: bold; font-size: 1.3rem; color: var(--primary-blue); border-top: 2px solid #333; margin-top: 15px; }
+        
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .product-card { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary-blue); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        .export-actions { display: flex; gap: 15px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
+        
+        .canva-img-container { text-align: center; margin: 20px 0; }
+        .canva-img-container img { max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .instructions { background: #f9f0ff; padding: 15px; border-radius: 8px; border-left: 4px solid #7d2ae8; margin-top: 20px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="LogoOf.png" width="120" height="auto" alt="Logo" onerror="this.src='https://via.placeholder.com/40?text=V%26G'">
+                <div class="logo-text">VandG <span>Artech</span></div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a class="nav-link active" onclick="showSection('servicios')">Productos</a></li>
+                    <li><a class="nav-link" onclick="showSection('recibo')">Generar Recibo</a></li>
+                    <li><a class="nav-link" onclick="showSection('regalo')">Dar Regalo</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <section id="servicios" class="section active">
+            <h2>Inventario de Productos</h2>
+            <div class="form-group" style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                <input type="text" id="new-name" placeholder="Nombre (Ej: Licencia Office 2024)">
+                <input type="number" id="new-price" placeholder="Precio en Bs">
+                <button onclick="addProduct()" class="btn btn-blue" style="margin-top:10px; width: 100%;">Agregar al Catálogo</button>
+            </div>
+            <div id="product-list" class="product-grid"></div>
+        </section>
+
+        <section id="recibo" class="section">
+            <h2>Configurar Recibo</h2>
+            <div class="form-group">
+                <input type="text" id="client-name" placeholder="Nombre del Cliente" oninput="updatePreview()">
+                <input type="text" id="client-phone" placeholder="Celular" oninput="updatePreview()">
+            </div>
+            
+            <div id="selected-items-container"></div>
+            <button onclick="addItemRow()" class="btn btn-blue"><i class="fas fa-plus"></i> Añadir Ítem al Recibo</button>
+
+            <div id="capture-area" class="receipt-preview">
+                <div class="receipt-header">
+                    <img src="LogoOf.png" width="80" height="80" id="receipt-logo" onerror="this.style.display='none'">
+                    <h1 style="color:var(--primary-blue); font-size: 24px;">VandG Artech Technology</h1>
+                    <p style="color:var(--accent-red); font-weight:bold; letter-spacing: 2px;">RECIBO OFICIAL</p>
+                </div>
+                
+                <div class="receipt-row"><span>Cliente:</span> <span id="pre-name">-</span></div>
+                <div class="receipt-row"><span>Celular:</span> <span id="pre-phone">-</span></div>
+                <div class="receipt-row"><span>Fecha:</span> <span id="pre-date"></span></div>
+                
+                <div id="pre-items" style="margin: 20px 0; border-top: 1px solid #eee; min-height: 50px;"></div>
+                
+                <div class="receipt-row total-row"><span>TOTAL A PAGAR:</span> <span id="pre-total">0.00 Bs</span></div>
+                
+                <div style="text-align:center; margin-top:30px; font-style:italic; color:#777; font-size: 14px;">
+                    <p>¡Gracias por su preferencia!</p>
+                    <p>Soluciones Tecnológicas VandG</p>
+                </div>
+            </div>
+
+            <div class="export-actions">
+                <button onclick="exportImage('capture-area')" class="btn btn-green"><i class="fas fa-image"></i> Guardar Imagen</button>
+                <button onclick="exportPDFRecibo()" class="btn btn-red"><i class="fas fa-file-pdf"></i> Guardar PDF</button>
+            </div>
+        </section>
+
+        <section id="regalo" class="section">
+            <h2>Generar Certificado de Regalo</h2>
+            <div class="form-group">
+                <input type="text" id="gift-name" placeholder="Nombre del Afortunado" oninput="updateGiftPreview()">
+                <input type="text" id="gift-phone" placeholder="Celular" oninput="updateGiftPreview()">
+            </div>
+
+            <div id="capture-gift" class="gift-preview">
+                <div class="gift-badge">GIFT</div>
+                <div class="receipt-header" style="border-bottom-color: #7d2ae8;">
+                    <img src="LogoOf.png" width="120" height="auto" onerror="this.style.display='none'">
+                    <h1 style="color:#7d2ae8; font-size: 24px;">VandG Artech Gift</h1>
+                    <p style="color:#333; font-weight:bold;">¡FELICIDADES POR TU REGALO!</p>
+                </div>
+
+                <div class="receipt-row"><span>Para:</span> <strong id="g-name">-</strong></div>
+                <div class="receipt-row"><span>Celular:</span> <span id="g-phone">-</span></div>
+                <div class="receipt-row"><span>Producto:</span> <span style="color:#7d2ae8; font-weight:bold;">CANVA PRO - 1 AÑO</span></div>
+
+                <div class="canva-img-container">
+                    <img src="CanvaProEduGift.png" height="600px" width="auto" alt="Canva Pro" id="canva-banner">
+                </div>
+
+                <div style="margin: 15px 0; font-size: 0.95rem;">
+                    <p><strong>Beneficios de tu cuenta Canva Pro:</strong></p>
+                    <ul style="margin-left: 20px; color: #555;">
+                        <li>Acceso a +100 millones de fotos, vídeos y elementos premium.</li>
+                        <li>Más de 600.000 plantillas premium.</li>
+                        <li>Quitar fondos de imágenes y videos al instante.</li>
+                        <li>Kit de marca para logos y colores.</li>
+                        <li>Más resultados por menos trabajo.</li>
+                    </ul>
+                </div>
+
+                <div class="instructions">
+                    <p><strong><i class="fas fa-info-circle"></i> Instrucciones para reclamar:</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 5px;">
+                        <li>Debes tener una cuenta de <strong>Canva Gratis</strong> creada.</li>
+                        <li>Envíanos el <strong>correo electrónico</strong> vinculado a esa cuenta.</li>
+                        <li>Espera la confirmación de activación por parte de nuestro equipo.</li>
+                    </ol>
+                </div>
+
+                <div style="text-align:center; margin-top:20px; font-size: 12px; color:#999;">
+                    <p>VandG Artech Technology - Elevando tu Creatividad</p>
+                </div>
+            </div>
+
+            <div class="export-actions">
+                <button onclick="exportImage('capture-gift')" class="btn btn-purple"><i class="fas fa-image"></i> Guardar Imagen Regalo</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Datos iniciales
+        let products = JSON.parse(localStorage.getItem('vg_prods')) || [
+            { id: 1, name: "Licencia Windows 11 Pro", price: 150 },
+            { id: 2, name: "Mantenimiento Técnico", price: 200 }
+        ];
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            
+            // Buscar el link correcto por el onclick
+            document.querySelectorAll('.nav-link').forEach(l => {
+                if(l.getAttribute('onclick').includes(id)) l.classList.add('active');
+            });
+
+            if(id === 'recibo') updatePreview();
+            if(id === 'regalo') updateGiftPreview();
+        }
+
+        function addProduct() {
+            const name = document.getElementById('new-name').value;
+            const price = document.getElementById('new-price').value;
+            if(!name || !price) return alert("Complete los campos");
+            products.push({ id: Date.now(), name, price: parseFloat(price) });
+            localStorage.setItem('vg_prods', JSON.stringify(products));
+            renderProducts();
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-price').value = '';
+        }
+
+        function renderProducts() {
+            document.getElementById('product-list').innerHTML = products.map(p => `
+                <div class="product-card">
+                    <strong>${p.name}</strong><br>
+                    <span>${p.price.toFixed(2)} Bs</span>
+                    <button onclick="deleteProd(${p.id})" style="float:right; border:none; color:red; cursor:pointer; background:none"><i class="fas fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function deleteProd(id) {
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('vg_prods', JSON.stringify(products));
+            renderProducts();
+        }
+
+        function addItemRow() {
+            const container = document.getElementById('selected-items-container');
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = `
+                <div class="item-controls">
+                    <select class="prod-sel" style="flex:2" onchange="checkLicence(this)">
+                        <option value="">-- Seleccionar Producto --</option>
+                        ${products.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+                    </select>
+                    <input type="number" class="prod-desc" placeholder="Desc %" style="width:70px" oninput="updatePreview()">
+                    <button onclick="this.parentElement.parentElement.remove(); updatePreview();" class="btn btn-red" style="padding:8px"><i class="fas fa-times"></i></button>
+                </div>
+                <input type="text" class="lic-input" placeholder="Escriba la clave de licencia aquí..." oninput="updatePreview()">
+            `;
+            container.appendChild(row);
+        }
+
+        function checkLicence(sel) {
+            const row = sel.parentElement.parentElement;
+            const prod = products.find(p => p.id == sel.value);
+            const input = row.querySelector('.lic-input');
+            if (prod && prod.name.toLowerCase().includes('licencia')) {
+                input.style.display = 'block';
+            } else {
+                input.style.display = 'none';
+                input.value = '';
+            }
+            updatePreview();
+        }
+
+        function updatePreview() {
+            document.getElementById('pre-name').textContent = document.getElementById('client-name').value || '-';
+            document.getElementById('pre-phone').textContent = document.getElementById('client-phone').value || '-';
+            document.getElementById('pre-date').textContent = new Date().toLocaleDateString();
+
+            const itemsContainer = document.getElementById('pre-items');
+            itemsContainer.innerHTML = '';
+            let total = 0;
+
+            document.querySelectorAll('.item-row').forEach(row => {
+                const id = row.querySelector('.prod-sel').value;
+                const prod = products.find(p => p.id == id);
+                if (prod) {
+                    const desc = parseFloat(row.querySelector('.prod-desc').value) || 0;
+                    const lic = row.querySelector('.lic-input').value;
+                    const sub = prod.price - (prod.price * desc / 100);
+                    total += sub;
+
+                    itemsContainer.innerHTML += `
+                        <div class="receipt-row">
+                            <span style="max-width: 70%">
+                                <strong>${prod.name}</strong>
+                                ${lic ? `<br><small style="color:var(--accent-red)">ID Licencia: ${lic}</small>` : ''}
+                            </span>
+                            <span>${sub.toFixed(2)} Bs</span>
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('pre-total').textContent = total.toFixed(2) + " Bs";
+        }
+
+        // Lógica de Regalo
+        function updateGiftPreview() {
+            document.getElementById('g-name').textContent = document.getElementById('gift-name').value || '-';
+            document.getElementById('g-phone').textContent = document.getElementById('gift-phone').value || '-';
+        }
+
+        // EXPORTACIÓN
+        async function exportImage(divId) {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
+            
+            try {
+                const element = document.getElementById(divId);
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: "#ffffff"
+                });
+                
+                const link = document.createElement('a');
+                link.download = `VandG_${divId}_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                alert("Error al generar imagen.");
+            }
+            btn.innerHTML = originalText;
+        }
+
+        function exportPDFRecibo() {
+            const btn = event.currentTarget;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const logo = document.getElementById('receipt-logo');
+
+                if(logo && logo.complete && logo.naturalHeight !== 0) {
+                    doc.addImage(logo, 'PNG', 90, 10, 25, 25);
+                }
+
+                doc.setFontSize(20);
+                doc.setTextColor(26, 58, 108);
+                doc.text("VandG Artech Technology", 105, 45, { align: 'center' });
+                doc.setFontSize(10);
+                doc.setTextColor(192, 57, 43);
+                doc.text("RECIBO OFICIAL", 105, 52, { align: 'center' });
+
+                doc.setFontSize(11);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Cliente: ${document.getElementById('pre-name').textContent}`, 20, 70);
+                doc.text(`Celular: ${document.getElementById('pre-phone').textContent}`, 20, 77);
+                doc.text(`Fecha: ${document.getElementById('pre-date').textContent}`, 20, 84);
+
+                let y = 100;
+                doc.setDrawColor(26, 58, 108);
+                doc.line(20, 92, 190, 92);
+                
+                document.querySelectorAll('.item-row').forEach(row => {
+                    const id = row.querySelector('.prod-sel').value;
+                    const prod = products.find(p => p.id == id);
+                    if(prod) {
+                        const desc = row.querySelector('.prod-desc').value;
+                        const lic = row.querySelector('.lic-input').value;
+                        const sub = prod.price - (prod.price * (desc||0) / 100);
+                        
+                        doc.setFont("helvetica", "bold");
+                        doc.text(`${prod.name}`, 20, y);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(`${sub.toFixed(2)} Bs`, 170, y);
+                        y += 6;
+                        if(lic) {
+                            doc.setFontSize(9);
+                            doc.setTextColor(100, 100, 100);
+                            doc.text(`ID Licencia: ${lic}`, 22, y);
+                            y += 5;
+                            doc.setFontSize(11);
+                            doc.setTextColor(0, 0, 0);
+                        }
+                        y += 4;
+                    }
+                });
+
+                doc.line(20, y, 190, y);
+                doc.setFontSize(14);
+                doc.setFont("helvetica", "bold");
+                doc.text(`TOTAL: ${document.getElementById('pre-total').textContent}`, 190, y + 10, { align: 'right' });
+
+                doc.save(`Recibo_VandG_${Date.now()}.pdf`);
+            } catch (err) {
+                alert("Error al generar PDF.");
+            }
+            btn.innerHTML = '<i class="fas fa-file-pdf"></i> Guardar PDF';
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
